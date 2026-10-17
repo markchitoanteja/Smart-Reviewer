@@ -1,6 +1,7 @@
 <?php
 $pageTitle = 'Dashboard';
 $activePage = 'dashboard';
+
 require 'includes/app_header.php';
 
 $lessons = [
@@ -37,7 +38,7 @@ $lessons = [
             <i class="fa-solid fa-sparkles"></i>
             YOUR LEARNING SPACE
         </div>
-        <h2>Welcome back, <?= htmlspecialchars($firstName) ?>!</h2>
+        <h2>Welcome back, <?= htmlspecialchars($_SESSION['user']['first_name'] ?? 'Student') ?>!</h2>
         <p>
             Ready to learn something new today? Review your lessons, test your
             knowledge, and build better study habits one step at a time.

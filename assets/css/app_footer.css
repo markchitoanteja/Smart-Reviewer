@@ -1,0 +1,87 @@
+:root {
+    --primary: #155EEF;
+    --primary-dark: #1248BD;
+    --accent: #EAF1FF;
+}
+
+body {
+    margin: 0;
+    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    background: #F5F7FC;
+}
+
+/* Mobile-only bottom navigation */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: stretch;
+
+    min-height: 72px;
+    padding: 7px 4px calc(7px + env(safe-area-inset-bottom));
+
+    background: #FFFFFF;
+    border-top: 1px solid #E5EAF3;
+    box-shadow: 0 -5px 20px rgba(20, 45, 90, 0.06);
+}
+
+.mobile-bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    min-width: 0;
+    min-height: 54px;
+    padding: 5px 1px;
+
+    color: #7B879B;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    border-radius: 12px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-bottom-nav a i {
+    font-size: 19px;
+}
+
+.mobile-bottom-nav a.active {
+    color: var(--primary);
+    background: var(--accent);
+}
+
+.mobile-bottom-nav a.sign-out {
+    color: #DC3545;
+}
+
+.mobile-bottom-nav a.sign-out:active {
+    background: #FFF0F1;
+}
+
+/* Strictly mobile: hide desktop navigation if old CSS remains */
+.sidebar,
+.desktop-sidebar,
+.desktop-navigation {
+    display: none !important;
+}
+
+/* Remove desktop margins that can push content off-screen */
+.main-content,
+.page-content,
+.content-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}

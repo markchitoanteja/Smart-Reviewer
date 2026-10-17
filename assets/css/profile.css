@@ -1,0 +1,221 @@
+.profile-page {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--text);
+}
+
+/* Profile hero */
+
+.profile-page .profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+    margin-bottom: 24px;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(135deg,
+            var(--primary),
+            var(--primary-dark));
+}
+
+.profile-page .profile-avatar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 76px;
+    height: 76px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.profile-page .profile-hero h2 {
+    margin: 0 0 5px;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.profile-page .profile-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, .85);
+    overflow-wrap: anywhere;
+}
+
+/* Section headings */
+
+.profile-page .profile-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.profile-page .profile-section-title i {
+    color: var(--primary);
+}
+
+.profile-page .profile-section-subtitle {
+    margin-bottom: 22px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Form labels and controls */
+
+.profile-page .profile-form .form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #344054;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.profile-page .profile-form .form-control,
+.profile-page .profile-form .form-select {
+    width: 100%;
+    min-height: 48px;
+    padding: 11px 13px;
+    border: 1px solid #D0D5DD;
+    border-radius: 12px;
+    background-color: #fff;
+    color: var(--text);
+    font-size: 14px;
+    box-shadow: none;
+}
+
+.profile-page .profile-form .form-control:focus,
+.profile-page .profile-form .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(21, 94, 239, .12);
+}
+
+.profile-page .profile-form .form-control[readonly] {
+    background: #F2F4F7;
+    color: var(--muted);
+}
+
+.profile-page .profile-form .form-text {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Dividers */
+
+.profile-page .profile-divider {
+    height: 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 26px 0;
+    opacity: 1;
+}
+
+/* Information note */
+
+.profile-page .profile-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    border: 1px solid #D6E4FF;
+    border-radius: 14px;
+    background: #F0F5FF;
+    color: #344054;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.profile-page .profile-note i {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: var(--primary);
+}
+
+/* Form actions */
+
+.profile-page .profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.profile-page .profile-actions .btn {
+    min-height: 45px;
+    padding: 11px 18px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+/* Password visibility controls */
+
+.profile-page .password-toggle {
+    position: relative;
+}
+
+.profile-page .password-toggle .form-control {
+    padding-right: 46px;
+}
+
+.profile-page .password-toggle button {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    display: grid;
+    place-items: center;
+    transform: translateY(-50%);
+    padding: 5px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.profile-page .password-toggle button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 5px;
+}
+
+/* Profile page mobile layout */
+
+@media (max-width: 575.98px) {
+    .profile-page .profile-hero {
+        gap: 14px;
+        padding: 19px;
+        border-radius: 17px;
+    }
+
+    .profile-page .profile-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 17px;
+        font-size: 21px;
+    }
+
+    .profile-page .profile-hero h2 {
+        font-size: 19px;
+    }
+
+    .profile-page .profile-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .profile-page .profile-actions .btn {
+        width: 100%;
+    }
+}
