@@ -1,345 +1,333 @@
 <?php
+
 $pageTitle = 'My Profile';
 $activePage = 'profile';
 
-require 'includes/app_header.php';
+require_once __DIR__ . '/includes/header.php';
+
+// Student full name.
+$middleName = trim($student['middle_name'] ?? '');
+$middleInitials = '';
+
+if ($middleName !== '') {
+    $middleNameParts = preg_split('/\s+/', $middleName);
+    $middleInitials = implode('.', array_map(function ($part) {
+        return strtoupper(substr($part, 0, 1));
+    }, $middleNameParts)) . '.';
+}
+
+$fullName = trim(implode(' ', array_filter([
+    $student['first_name'] ?? '',
+    $middleInitials,
+    $student['last_name'] ?? ''
+])));
+
+// Student initials.
+$initials = strtoupper(
+    substr($student['first_name'] ?? 'S', 0, 1) .
+    substr($student['last_name'] ?? '', 0, 1)
+);
+
+// Profile image.
+$profileImage = $student['image'] ? base_url() . "/assets/img/uploads/" . $student['image'] : null;
+
+// Enrollment status.
+$enrollmentStatus = $student['enrollment_status'] ?? 'enrolled';
+
+// Account information.
+$username = $user['username'] ?? 'Not available';
+$email = $user['email'] ?? 'Not available';
 ?>
 
-<link rel="stylesheet" href="assets/css/profile.css?v=1.0">
-
-<div class="profile-page">
-
-    <div class="page-heading">
+<main class="app-main profile-page pb-0">
+    <!-- Page Heading -->
+    <div class="profile-page-heading">
         <div>
+            <p class="eyebrow">STUDENT ACCOUNT</p>
             <h1>My Profile</h1>
-            <p>Manage your account settings and personal information.</p>
+            <p class="profile-page-subtitle">
+                View your personal and academic information.
+            </p>
         </div>
 
-        <div class="icon-box icon-purple d-none d-sm-grid">
-            <i class="fa-solid fa-user-pen"></i>
+        <div class="profile-heading-icon">
+            <i class="bi bi-person-circle"></i>
         </div>
     </div>
 
-    <div class="profile-hero">
-        <?php
-        $nameParts = preg_split('/\s+/', trim($fullName), -1, PREG_SPLIT_NO_EMPTY);
-        $avatarInitials = '';
-        if (!empty($nameParts)) {
-            $avatarInitials = strtoupper(substr($nameParts[0], 0, 1));
-            if (count($nameParts) > 1) {
-                $avatarInitials .= strtoupper(substr($nameParts[count($nameParts) - 1], 0, 1));
-            }
-        }
-        ?>
-        <div class="profile-avatar" id="profileAvatar"><?= htmlspecialchars($avatarInitials, ENT_QUOTES, 'UTF-8') ?></div>
-        <div>
-            <h2 id="profileDisplayName"><?= $fullName ?></h2>
-            <p id="profileDisplayEmail"><?= $_SESSION['user']['email'] ?></p>
-            <div class="d-flex flex-wrap gap-2 mt-2">
-                <span class="badge bg-light text-primary"><?= $_SESSION['user']['role'] ?></span>
-                <span class="badge bg-light text-dark"><?= $_SESSION['user']['username'] ?></span>
+    <!-- Student Profile Card -->
+    <section class="profile-hero-card">
+
+        <div class="profile-hero-decoration profile-decoration-one"></div>
+        <div class="profile-hero-decoration profile-decoration-two"></div>
+
+        <div class="profile-hero-content">
+
+            <div class="profile-picture-wrapper">
+
+                <?php if (!empty($profileImage)): ?>
+
+                    <img src="<?= escape($profileImage) ?>" alt="<?= escape($fullName) ?>" class="profile-picture" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+
+                    <div class="profile-picture-fallback" style="display:none;">
+                        <?= escape($initials) ?>
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="profile-picture-fallback">
+                        <?= escape($initials) ?>
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+            <div class="profile-hero-info">
+
+                <span class="profile-role-label">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    STUDENT
+                </span>
+
+                <h2><?= escape($fullName ?: 'Student Name') ?></h2>
+
+                <p class="profile-student-number">
+                    <i class="bi bi-person-vcard"></i>
+                    <?= escape($student['student_id'] ?? 'No Student ID') ?>
+                </p>
+
+                <span class="enrollment-badge status-<?= escape($enrollmentStatus) ?>">
+                    <span></span>
+                    <?= escape(ucfirst($enrollmentStatus)) ?>
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="profile-hero-actions">
+            <button type="button" class="btn profile-edit-btn" data-bs-toggle="modal" data-bs-target="#edit-profile-modal">
+                <i class="bi bi-pencil-square"></i>
+                Edit Profile
+            </button>
+        </div>
+
+        <div class="profile-hero-footer">
+            <div>
+                <i class="bi bi-calendar3"></i>
+                School Year <?= escape($student['school_year'] ?? 'Not available') ?>
+            </div>
+
+            <div>
+                <i class="bi bi-book"></i>
+                Grade <?= escape($student['grade_level'] ?? '11') ?>
             </div>
         </div>
-    </div>
+    </section>
 
-    <form id="profileForm" class="profile-form">
+    <!-- Academic Overview -->
+    <section class="profile-section">
 
-        <div class="panel mb-4">
-
-            <div class="profile-section-title">
-                <i class="fa-solid fa-address-card"></i>
-                Personal Information
+        <div class="profile-section-heading">
+            <div>
+                <h2>Academic Information</h2>
+                <p>Your current school enrollment details.</p>
             </div>
 
-            <p class="profile-section-subtitle">
-                Update the personal details associated with your account.
-            </p>
-
-            <div class="row g-3">
-
-                <div class="col-md-4">
-                    <label for="firstName" class="form-label">
-                        First Name <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="firstName" name="first_name" value="<?= isset($_SESSION['user']['first_name']) ? htmlspecialchars($_SESSION['user']['first_name'], ENT_QUOTES, 'UTF-8') : '' ?>" maxlength="100" autocomplete="given-name" required>
-                </div>
-
-                <div class="col-md-4">
-                    <label for="middleName" class="form-label">
-                        Middle Name
-                    </label>
-                    <input type="text" class="form-control" id="middleName" name="middle_name" value="<?= isset($_SESSION['user']['middle_name']) ? htmlspecialchars($_SESSION['user']['middle_name'], ENT_QUOTES, 'UTF-8') : '' ?>" maxlength="100" autocomplete="additional-name">
-                    <div class="form-text">Optional</div>
-                </div>
-
-                <div class="col-md-4">
-                    <label for="lastName" class="form-label">
-                        Last Name <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="lastName" name="last_name" value="<?= isset($_SESSION['user']['last_name']) ? htmlspecialchars($_SESSION['user']['last_name'], ENT_QUOTES, 'UTF-8') : '' ?>" maxlength="100" autocomplete="family-name" required>
-                </div>
-
-                <div class="col-12">
-                    <label for="email" class="form-label">
-                        Email Address <span class="text-danger">*</span>
-                    </label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?= isset($_SESSION['user']['email']) ? htmlspecialchars($_SESSION['user']['email'], ENT_QUOTES, 'UTF-8') : '' ?>" maxlength="255" autocomplete="email" required>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" value="<?= isset($_SESSION['user']['username']) ? htmlspecialchars($_SESSION['user']['username'], ENT_QUOTES, 'UTF-8') : '' ?>" readonly>
-                    <div class="form-text">Your username cannot be changed.</div>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="accountStatus" class="form-label">
-                        Account Status
-                    </label>
-                    <input type="text" class="form-control" id="accountStatus" value="<?= isset($_SESSION['user']['account_status']) ? htmlspecialchars($_SESSION['user']['account_status'], ENT_QUOTES, 'UTF-8') : '' ?>" readonly>
-                </div>
-
+            <div class="profile-section-icon academic-icon">
+                <i class="bi bi-mortarboard"></i>
             </div>
+        </div>
 
-            <hr class="profile-divider">
+        <div class="profile-information-card">
 
-            <div class="profile-section-title">
-                <i class="fa-solid fa-graduation-cap"></i>
-                Academic Information
-            </div>
-
-            <p class="profile-section-subtitle">
-                Your current student details. These fields are editable in
-                this design preview.
-            </p>
-
-            <div class="row g-3">
-
-                <div class="col-md-6">
-                    <label for="studentNumber" class="form-label">
-                        Student Number
-                    </label>
-                    <input type="text" class="form-control" id="studentNumber" name="student_number" value="<?= isset($_SESSION['student_profile']['student_number']) ? htmlspecialchars($_SESSION['student_profile']['student_number'], ENT_QUOTES, 'UTF-8') : '' ?>" readonly>
+            <div class="profile-info-item">
+                <div class="profile-info-icon blue">
+                    <i class="bi bi-layers"></i>
                 </div>
 
-                <div class="col-md-6">
-                    <label for="gradeLevel" class="form-label">
-                        Grade Level
-                    </label>
-                    <select class="form-select" id="gradeLevel" name="grade_level">
-                        <option value="11" <?= isset($_SESSION['student_profile']['grade_level']) && $_SESSION['student_profile']['grade_level'] === 11 ? 'selected' : '' ?>>Grade 11</option>
-                        <option value="12" <?= isset($_SESSION['student_profile']['grade_level']) && $_SESSION['student_profile']['grade_level'] === 12 ? 'selected' : '' ?>>Grade 12</option>
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="strand" class="form-label">Strand</label>
-                    <select class="form-select" id="strand" name="strand">
-                        <option value="STEM" <?= isset($_SESSION['student_profile']['strand']) && $_SESSION['student_profile']['strand'] === 'STEM' ? 'selected' : '' ?>>STEM</option>
-                        <option value="ABM" <?= isset($_SESSION['student_profile']['strand']) && $_SESSION['student_profile']['strand'] === 'ABM' ? 'selected' : '' ?>>ABM</option>
-                        <option value="HUMSS" <?= isset($_SESSION['student_profile']['strand']) && $_SESSION['student_profile']['strand'] === 'HUMSS' ? 'selected' : '' ?>>HUMSS</option>
-                        <option value="GAS" <?= isset($_SESSION['student_profile']['strand']) && $_SESSION['student_profile']['strand'] === 'GAS' ? 'selected' : '' ?>>GAS</option>
-                        <option value="TVL-ICT" <?= isset($_SESSION['student_profile']['strand']) && $_SESSION['student_profile']['strand'] === 'TVL-ICT' ? 'selected' : '' ?>>TVL - ICT</option>
-                        <option value="TVL-HE" <?= isset($_SESSION['student_profile']['strand']) && $_SESSION['student_profile']['strand'] === 'TVL-HE' ? 'selected' : '' ?>>TVL - Home Economics</option>
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="section" class="form-label">Section</label>
-                    <input type="text" class="form-control" id="section" name="section" value="<?= isset($_SESSION['student_profile']['section']) ? htmlspecialchars($_SESSION['student_profile']['section'], ENT_QUOTES, 'UTF-8') : 'ICT - A' ?>" readonly>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="schoolYear" class="form-label">School Year</label>
-                    <select class="form-select" id="schoolYear" name="school_year">
-                        <option value="2025-2026" <?= isset($_SESSION['student_profile']['school_year']) && $_SESSION['student_profile']['school_year'] === '2025-2026' ? 'selected' : '' ?>>2025-2026</option>
-                        <option value="2026-2027" <?= isset($_SESSION['student_profile']['school_year']) && $_SESSION['student_profile']['school_year'] === '2026-2027' ? 'selected' : '' ?>>2026-2027</option>
-                        <option value="2027-2028" <?= isset($_SESSION['student_profile']['school_year']) && $_SESSION['student_profile']['school_year'] === '2027-2028' ? 'selected' : '' ?>>2027-2028</option>
-                    </select>
-                </div>
-
-                <div class="col-md-6">
-                    <label for="enrollmentStatus" class="form-label">
-                        Enrollment Status
-                    </label>
-                    <select class="form-select" id="enrollmentStatus" name="enrollment_status">
-                        <option value="Enrolled" <?= isset($_SESSION['student_profile']['enrollment_status']) && $_SESSION['student_profile']['enrollment_status'] === 'Enrolled' ? 'selected' : '' ?>>Enrolled</option>
-                        <option value="Transferred" <?= isset($_SESSION['student_profile']['enrollment_status']) && $_SESSION['student_profile']['enrollment_status'] === 'Transferred' ? 'selected' : '' ?>>Transferred</option>
-                        <option value="Graduated" <?= isset($_SESSION['student_profile']['enrollment_status']) && $_SESSION['student_profile']['enrollment_status'] === 'Graduated' ? 'selected' : '' ?>>Graduated</option>
-                        <option value="Inactive" <?= isset($_SESSION['student_profile']['enrollment_status']) && $_SESSION['student_profile']['enrollment_status'] === 'Inactive' ? 'selected' : '' ?>>Inactive</option>
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="profile-note mt-3">
-                <i class="fa-solid fa-circle-info"></i>
                 <div>
-                    <strong>Academic records</strong>
-                    <div>
-                        This is a design preview. Academic changes will not
-                        update official school records.
-                    </div>
+                    <small>Grade Level</small>
+                    <strong>
+                        Grade <?= escape($student['grade_level'] ?? '11') ?>
+                    </strong>
                 </div>
             </div>
 
-            <hr class="profile-divider">
+            <div class="profile-info-item">
+                <div class="profile-info-icon green">
+                    <i class="bi bi-code-slash"></i>
+                </div>
 
-            <div class="profile-section-title">
-                <i class="fa-solid fa-shield-halved"></i>
-                Change Password
+                <div>
+                    <small>Strand</small>
+                    <strong>
+                        <?= escape($student['strand'] ?? 'Not available') ?>
+                    </strong>
+                </div>
             </div>
 
-            <p class="profile-section-subtitle">
-                Leave these fields blank if you do not want to change your password.
-            </p>
-
-            <div class="row g-3">
-
-                <div class="col-12">
-                    <label for="currentPassword" class="form-label">
-                        Current Password
-                    </label>
-                    <div class="password-toggle">
-                        <input type="password" class="form-control" id="currentPassword" name="current_password" autocomplete="current-password">
-                        <button type="button" class="toggle-password" data-target="currentPassword" aria-label="Show current password">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
+            <div class="profile-info-item">
+                <div class="profile-info-icon orange">
+                    <i class="bi bi-people"></i>
                 </div>
 
-                <div class="col-md-6">
-                    <label for="newPassword" class="form-label">
-                        New Password
-                    </label>
-                    <div class="password-toggle">
-                        <input type="password" class="form-control" id="newPassword" name="new_password" minlength="8" autocomplete="new-password">
-                        <button type="button" class="toggle-password" data-target="newPassword" aria-label="Show new password">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="form-text">At least 8 characters.</div>
+                <div>
+                    <small>Section</small>
+                    <strong>
+                        <?= escape($student['section'] ?? 'Not available') ?>
+                    </strong>
                 </div>
-
-                <div class="col-md-6">
-                    <label for="confirmPassword" class="form-label">
-                        Confirm New Password
-                    </label>
-                    <div class="password-toggle">
-                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" minlength="8" autocomplete="new-password">
-                        <button type="button" class="toggle-password" data-target="confirmPassword" aria-label="Show password confirmation">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
             </div>
 
-            <div class="profile-actions">
-                <button type="reset" class="btn btn-light-blue">
-                    <i class="fa-solid fa-rotate-left me-2"></i>
-                    Reset
-                </button>
+            <div class="profile-info-item">
+                <div class="profile-info-icon purple">
+                    <i class="bi bi-calendar-range"></i>
+                </div>
 
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-floppy-disk me-2"></i>
-                    Save Changes
-                </button>
+                <div>
+                    <small>School Year</small>
+                    <strong>
+                        <?= escape($student['school_year'] ?? 'Not available') ?>
+                    </strong>
+                </div>
             </div>
 
         </div>
-    </form>
 
-</div>
+    </section>
 
-<script>
-    const profileForm = document.getElementById('profileForm');
-    const profileMessage = document.getElementById('profileMessage');
+    <!-- Personal Information -->
+    <section class="profile-section">
 
-    const firstName = document.getElementById('firstName');
-    const middleName = document.getElementById('middleName');
-    const lastName = document.getElementById('lastName');
-    const email = document.getElementById('email');
+        <div class="profile-section-heading">
+            <div>
+                <h2>Personal Information</h2>
+                <p>Your registered personal details.</p>
+            </div>
 
-    function updateProfilePreview() {
-        const first = firstName.value.trim();
-        const middle = middleName.value.trim();
-        const last = lastName.value.trim();
+            <div class="profile-section-icon personal-icon">
+                <i class="bi bi-person-lines-fill"></i>
+            </div>
+        </div>
 
-        document.getElementById('profileDisplayName').textContent =
-            [first, middle, last].filter(Boolean).join(' ') || 'Your Name';
+        <div class="profile-information-card">
 
-        document.getElementById('profileDisplayEmail').textContent =
-            email.value.trim() || 'No email address';
+            <div class="profile-detail-row">
+                <div>
+                    <small>First Name</small>
+                    <strong><?= escape($student['first_name'] ?? 'Not provided') ?></strong>
+                </div>
+                <i class="bi bi-person"></i>
+            </div>
 
-        document.getElementById('profileAvatar').textContent =
-            ((first.charAt(0) || '') + (last.charAt(0) || '')).toUpperCase() || '?';
-    }
+            <div class="profile-detail-row">
+                <div>
+                    <small>Middle Name</small>
+                    <strong><?= escape($student['middle_name'] ?? 'Not provided') ?></strong>
+                </div>
+                <i class="bi bi-person"></i>
+            </div>
 
-    [firstName, middleName, lastName, email].forEach(input => {
-        input.addEventListener('input', updateProfilePreview);
-    });
+            <div class="profile-detail-row">
+                <div>
+                    <small>Last Name</small>
+                    <strong><?= escape($student['last_name'] ?? 'Not provided') ?></strong>
+                </div>
+                <i class="bi bi-person"></i>
+            </div>
 
-    document.querySelectorAll('.toggle-password').forEach(button => {
-        button.addEventListener('click', function () {
-            const input = document.getElementById(this.dataset.target);
-            const icon = this.querySelector('i');
-            const showPassword = input.type === 'password';
+            <div class="profile-detail-row">
+                <div>
+                    <small>Date of Birth</small>
+                    <strong>
+                        <?= escape(formatDate($student['date_of_birth'] ?? null)) ?>
+                    </strong>
+                </div>
+                <i class="bi bi-calendar-event"></i>
+            </div>
 
-            input.type = showPassword ? 'text' : 'password';
-            icon.classList.toggle('fa-eye', !showPassword);
-            icon.classList.toggle('fa-eye-slash', showPassword);
+            <div class="profile-detail-row">
+                <div>
+                    <small>Sex</small>
+                    <strong><?= escape($student['sex'] ?? 'Not provided') ?></strong>
+                </div>
+                <i class="bi bi-gender-ambiguous"></i>
+            </div>
 
-            this.setAttribute(
-                'aria-label',
-                showPassword ? 'Hide password' : 'Show password'
-            );
-        });
-    });
+        </div>
 
-    document.getElementById('newPassword').addEventListener('input', validatePasswords);
-    document.getElementById('confirmPassword').addEventListener('input', validatePasswords);
+    </section>
 
-    function validatePasswords() {
-        const newPassword = document.getElementById('newPassword');
-        const confirmPassword = document.getElementById('confirmPassword');
+    <!-- Account Information -->
+    <section class="profile-section">
 
-        confirmPassword.setCustomValidity(
-            confirmPassword.value !== '' &&
-                confirmPassword.value !== newPassword.value
-                ? 'The passwords do not match.'
-                : ''
-        );
-    }
+        <div class="profile-section-heading">
+            <div>
+                <h2>Account Information</h2>
+                <p>Your Smart Reviewer login details.</p>
+            </div>
 
-    profileForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        validatePasswords();
+            <div class="profile-section-icon account-icon">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+        </div>
 
-        if (!profileForm.reportValidity()) {
-            return;
-        }
+        <div class="profile-information-card">
 
-        profileMessage.classList.remove('d-none');
-        profileMessage.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest'
-        });
-    });
+            <div class="profile-detail-row">
+                <div>
+                    <small>Username</small>
+                    <strong><?= escape($username) ?></strong>
+                </div>
+                <i class="bi bi-person-badge"></i>
+            </div>
 
-    profileForm.addEventListener('reset', function () {
-        setTimeout(() => {
-            profileMessage.classList.add('d-none');
-            document.querySelectorAll('.password-toggle input').forEach(input => {
-                input.type = 'password';
-            });
-            document.querySelectorAll('.toggle-password i').forEach(icon => {
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            });
-            updateProfilePreview();
-        }, 0);
-    });
-</script>
+            <div class="profile-detail-row">
+                <div>
+                    <small>Email Address</small>
+                    <strong><?= escape($email) ?></strong>
+                </div>
+                <i class="bi bi-envelope"></i>
+            </div>
 
-<?php require 'includes/app_footer.php'; ?>
+            <div class="profile-detail-row">
+                <div>
+                    <small>Student ID</small>
+                    <strong>
+                        <?= escape($student['student_id'] ?? 'Not available') ?>
+                    </strong>
+                </div>
+                <i class="bi bi-card-text"></i>
+            </div>
+
+            <div class="profile-detail-row">
+                <div>
+                    <small>Account Created</small>
+                    <strong>
+                        <?= escape(formatDate($user['created_at'] ?? $student['created_at'] ?? null)) ?>
+                    </strong>
+                </div>
+                <i class="bi bi-clock-history"></i>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- School Information -->
+    <section class="profile-school-note">
+        <div class="profile-school-logo">
+            <img src="assets/img/school-logo-transparent.png" alt="Dolores National High School" onerror="this.style.display='none';">
+        </div>
+
+        <div>
+            <strong>Dolores National High School</strong>
+            <p>Smart Reviewer Learning Portal</p>
+            <small>Empowering students through digital learning.</small>
+        </div>
+    </section>
+</main>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
